@@ -1,0 +1,204 @@
+
+========================================================Connexion php==========================================================================================================
+
+<?php
+
+
+ $bdd = new PDO("mysql:host=localhost;dbname=gradien","root","morgan");
+   if (isset($_POST["submit"])){
+    //  mes Variables
+                @$email = $_POST["email"];
+                @$mdp = $_POST["mdp"];
+                
+               
+         
+// on verifie si les champs sont vide ou pas
+      if(empty($email) && empty($mdp)){
+             echo "<p style= 'color:red'> veuillez remplir les champs obligatoire </p>";
+         }
+          else{
+            //   on verifie si l'email est correct
+                 if(filter_var($email, FILTER_VALIDATE_EMAIL) && !empty($mdp)){
+                         
+                          $requser = $bdd->prepare("SELECT * FROM inscription WHERE email = ? AND mdp = ?");
+                          $requser->execute(array($email, $mdp));
+                          $userexist = $requser->rowCount();
+                          
+                          if($userexist == 1)
+                          { 
+                            $mdp = password_hash($_POST['mdp'], PASSWORD_DEFAULT);
+                            $query = $bdd->prepare("INSERT INTO user(email, mdp) VALUE(?,?)");
+                            $query->execute([$email, $mdp]);
+                            echo " <p style= 'color:green'> Bienvenu! </p> ";
+
+                          }
+                          else
+                          {
+                            echo "<p style= 'color:red'> Mauvais mail ou mots de passe ! </p>";
+                          }
+
+                       } else{
+                           echo "<p style= 'color:red'> veuillez remplir les champs obligatoire! </p>";
+                       }
+
+
+                   }         
+                }                                     
+
+                                            
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>connexion</title>
+    <style>
+        body{
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+        }
+        input{
+            margin: 2%;
+            border-radius: 2%;
+        }
+       .container{
+           display: flex;
+           flex-direction: column;
+           height: 500px;
+           width: 100rem;
+           background-color: #44a33d;
+       }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Connexion</h1>
+    
+    <form action="" method="POST">
+        
+        <input type="text" name="email" placeholder="Email*">
+        <input type="password" name="mdp" placeholder="Password*">
+        <button  type="submit" name="submit" class="">Valider</button>
+        
+    </form>
+    <a href="#">Mots de passe oublié ?</a>
+    <p>Vous n'avez pas encore de compte ?</p><a href="#">Inscrivez-vous ici</a>
+ 
+
+    </div>
+</body>
+</html>
+
+
+================================================================== Inscription php ===============================================================================================
+
+<?php  
+ 
+ if (isset($_POST["submit"])){
+    //  mes Variables
+                @$nom = $_POST["nom"];
+                @$prenom = $_POST["prenom"];
+                @$email = $_POST["email"];
+                @$date = $_POST["datedenaissance"];
+                @$mdp = ($_POST["mdp"]);
+                @$mdp2 = ($_POST["mdp2"]);
+
+// on verifie si les champs sont vide ou pas
+if( empty($mdp) && empty($mdp2) && empty($nom) && empty($email) && empty($prenom) && empty($date)){
+    echo "<p style= 'color:red'> veuillez remplir les champs obligatoire </p>";
+}
+  else{
+    //   on verifie si l'email est correct
+         if(filter_var($email, FILTER_VALIDATE_EMAIL)){
+             if(empty($nom) && empty($prenom)){
+                 echo " <p style= 'color:red'>veuillez remplir les champs obligatoire ! </p>";
+             }
+             else{
+                  if($mdp == $mdp2 && !empty($mdp)){ 
+                    $options = [
+                        'cost' => 12,
+                    ];
+                     $hashpass = password_hash($mdp, PASSWORD_BCRYPT, $options);   
+                
+                $bdd = new PDO("mysql:host=localhost;dbname=gradien","root","morgan");
+                $query = $bdd->prepare("INSERT INTO inscription(nom, prenom, email, datedenaissance, mdp) VALUE(?, ?, ?, ?, ?)");
+                $query->execute([ $nom, $prenom, $email, $date, $mdp]);
+                    echo " <p style= 'color:green'> Bienvenu! </p> ";
+
+            }
+            else{
+                 echo "<p style= 'color:red'> Les mots de passe ne sont pas identique ! </p>";
+            }
+         
+            
+
+               }
+
+             }else{
+                   echo "<p style= 'color:red'> Email invalide ! </p>";
+               }
+
+           
+
+           }         
+       }                                     
+
+
+
+
+
+
+
+
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription</title>
+    <style>
+        body{
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+        }
+        input{
+            margin: 2%;
+            border-radius: 2%;
+        }
+       .container{
+           display: flex;
+           flex-direction: column;
+           height: 500px;
+           width: 100rem;
+           background-color: #44a33d;
+       }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <h1>Inscription</h1>
+<form action="" method="POST">
+        <input type="text" name="nom" placeholder="nom*">
+        <input type="text" name="prenom" placeholder="prénom*">
+        <input type="text" name="email" placeholder="email*">
+        <input type="date" name="datedenaissance" placeholder="">
+        <input type="password" name="mdp" placeholder="Choose a password(at least 6 characters)*">
+        <input type="password" name="mdp2" placeholder="Confirm your password*">
+        <button  type="submit" name="submit" class="">Valider</button>
+        
+    </form>
+</div>
+    
+</body>
+</html>
